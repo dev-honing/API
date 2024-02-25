@@ -1,6 +1,7 @@
 // index.js
 
 const express = require('express');
+const path = require('path');
 const dotenv = require('dotenv');
 const { Client } = require('@notionhq/client');
 
@@ -14,6 +15,9 @@ dotenv.config();
 const notion = new Client({
   auth: process.env.NOTION_TOKEN,
 });
+
+// 정적 파일 서빙 설정
+app.use(express.static(path.join(__dirname, 'public')));
 
 // 루트 라우팅
 app.get('/', (req, res) => {
