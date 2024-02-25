@@ -15,19 +15,20 @@ const notion = new Client({
   auth: process.env.NOTION_TOKEN,
 });
 
-// 데이터 요청
-app.get('/', async (req, res) => {
+// 루트 라우팅
+app.get('/', (req, res) => {
+  res.send("Hello, Notion API!");
+})
+
+// Notion 라우팅(POST 요청 처리)
+app.post('/notion', async (req, res) => {
   try {
-    const response = await notion.databases.query({
-      database_id: process.env.DATABASE_ID,
-    });
-    // 가져온 데이터를 템플릿 엔진을 사용하여 HTML로 렌더링
-    res.render('index', { data: response.results });
+    res.send("Notion API 요청 성공!");
   } catch (error) {
-    console.error('데이터 가져오기 실패:', error);
-    res.status(500).send('서버 에러');
+    console.error("Notion 데이터 가져오기 실패: ", error);
+    res.status(500).send("서버 에러");
   }
-});
+})
 
 // 서버 시작
 const PORT = process.env.PORT || 3000;
