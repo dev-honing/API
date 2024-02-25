@@ -1,36 +1,84 @@
 <!-- public/notion.html -->
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Notion 데이터 페이지</title>
 </head>
 <body>
   <h1>Notion 데이터베이스 확인하기</h1>
-  <form id="fetchForm">
-    <button type="submit">데이터 가져오기</button>
-  </form>
-  <h2>Notion 데이터</h2>
-  <div class="notion"></div>
+  <div class="table-container"></div>
   <script>
-    async function fetchData(event) {
-      event.preventDefault(); // 폼의 기본 동작을 중지
+    async function fetchDataAndRenderTable() {
       try {
-        const response = await fetch("/api/notion", {
-          method: "POST",
+        const response = await fetch("/api/notion", { method: "POST" });
+        const data = await response.json();
+
+        // 데이터가 비어있을 경우 처리
+        if (!data || data.length === 0) {
+          throw new Error("데이터가 없습니다.");
+        }
+
+        const tableContainer = document.querySelector(".table-container");
+        const table = document.createElement("table");
+
+        // 테이블 헤더 생성
+        const thead = document.createElement("thead");
+        const headerRow = document.createElement("tr");
+        const headers = ["숫자", "날짜", "요일", "이름", "상태"]; // 헤더 추가
+        headers.forEach(headerText => {
+          const th = document.createElement("th");
+          th.textContent = headerText;
+          headerRow.appendChild(th);
         });
-        const data = await response.text();
-        document.querySelector(".notion").innerText = data;
+        thead.appendChild(headerRow);
+        table.appendChild(thead);
+
+        // 테이블 바디 생성
+        const tbody = document.createElement("tbody");
+        data.forEach(page => {
+          const row = document.createElement("tr");
+          const { 숫자, 날짜, 요일, 이름, 상태 } = page.properties;
+          const number = 숫자 ? 숫자.number : "N/A";
+          const date = 날짜 ? 날짜.date.start : "N/A";
+          const day = 요일 ? 요일.select.name : "N/A";
+          const name = 이름 ? 이름.title[0].plain_text : "N/A";
+          const status = 상태 ? 상태.status.name : "N/A";
+
+          // 데이터를 표의 각 셀에 추가
+          const numberCell = document.createElement("td");
+          numberCell.textContent = number;
+          row.appendChild(numberCell);
+
+          const dateCell = document.createElement("td");
+          dateCell.textContent = date;
+          row.appendChild(dateCell);
+
+          const dayCell = document.createElement("td");
+          dayCell.textContent = day;
+          row.appendChild(dayCell);
+
+          const nameCell = document.createElement("td");
+          nameCell.textContent = name;
+          row.appendChild(nameCell);
+
+          const statusCell = document.createElement("td");
+          statusCell.textContent = status;
+          row.appendChild(statusCell);
+
+          tbody.appendChild(row);
+        });
+        table.appendChild(tbody);
+
+        // 테이블을 컨테이너에 추가
+        tableContainer.appendChild(table);
       } catch (error) {
         console.error("데이터 가져오기 실패:", error);
       }
     }
 
-    document.getElementById("fetchForm").addEventListener("submit", function(event) {
-      fetchData(event); // 이벤트 객체를 fetchData 함수에 전달
-    });
+    fetchDataAndRenderTable();
   </script>
 </body>
 </html>
