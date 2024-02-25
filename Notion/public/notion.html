@@ -1,4 +1,5 @@
 <!-- public/notion.html -->
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -13,12 +14,19 @@
     async function fetchDataAndRenderTable() {
       try {
         const response = await fetch("/api/notion", { method: "POST" });
-        const data = await response.json();
+        let data = await response.json();
 
         // 데이터가 비어있을 경우 처리
         if (!data || data.length === 0) {
           throw new Error("데이터가 없습니다.");
         }
+
+        // 숫자 속성에 따라 데이터를 오름차순으로 정렬
+        data.sort((a, b) => {
+          const numA = a.properties.숫자 ? a.properties.숫자.number : 0;
+          const numB = b.properties.숫자 ? b.properties.숫자.number : 0;
+          return numA - numB;
+        });
 
         const tableContainer = document.querySelector(".table-container");
         const table = document.createElement("table");
